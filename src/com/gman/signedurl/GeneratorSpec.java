@@ -6,7 +6,7 @@ package com.gman.signedurl;
 import java.util.Date;
 
 /**
- * @author Dipper
+ * @author Gary Silverman
  *
  */
 public class GeneratorSpec {

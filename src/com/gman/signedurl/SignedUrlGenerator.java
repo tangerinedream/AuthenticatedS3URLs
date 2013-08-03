@@ -12,7 +12,7 @@ import java.util.GregorianCalendar;
 import java.util.Properties;
 
 /**
- * @author Dipper
+ * @author Gary Silverman
  *
  */
 public class SignedUrlGenerator {
