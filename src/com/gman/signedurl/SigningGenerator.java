@@ -5,6 +5,8 @@ package com.gman.signedurl;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -23,7 +25,7 @@ public class SigningGenerator {
 	
 	private AmazonS3 s3client_=null;	
 	
-	public String generate(GeneratorSpec spec) {
+	public List<String> generate(GeneratorSpec spec) {
 		
 		
 		try {
@@ -37,14 +39,21 @@ public class SigningGenerator {
 				s3client_=this.fabricateAmazonS3Client();
 			}
 			
+			List<String> listOfURLs=new ArrayList<String>(2);
 			URL url =null;
 			if(s3client_ != null ) {
-				url = s3client_.generatePresignedUrl(generatePresignedUrlRequest);
-			}
-			
-			return(url.toString());
-
-			
+				if(spec.isHttp()) {
+					url = s3client_.generatePresignedUrl(generatePresignedUrlRequest);	
+					listOfURLs.add(url.toString());
+				}
+				if(spec.isHttps()) {
+					s3client_.setEndpoint("http://s3.amazonaws.com");
+					url = s3client_.generatePresignedUrl(generatePresignedUrlRequest);
+					listOfURLs.add(url.toString());
+					s3client_.setEndpoint("https://s3.amazonaws.com");
+				}
+			}	
+			return(listOfURLs);
 		} catch (AmazonServiceException exception) {
 			System.out.println("Caught an AmazonServiceException, " +
 					"which means your request made it " +

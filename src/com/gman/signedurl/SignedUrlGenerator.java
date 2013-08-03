@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -40,19 +41,28 @@ public class SignedUrlGenerator {
 			spec.setBucketName(bucketName);  
 			spec.setObjectName(fileName);  
 			spec.setTtl(driver.calcTimeToLive(inputParams));
+			String httpStr=inputParams.getProperty(http_);
+			if(httpStr.compareTo("1")==0)
+				spec.setHttp(true);
+			String httpsStr=inputParams.getProperty(https_);
+			if(httpsStr.compareTo("1")==0)
+				spec.setHttps(true);
 
 			// Generate a Signed URL
 			String signedURL=null;
-			SigningGenerator gen=new SigningGenerator(); 
+			SigningGenerator gen=new SigningGenerator();
+			List<String> urls=null;
 			if( gen != null ) {
-				signedURL=gen.generate(spec);
-				if(signedURL !=null)
-					//System.out.println("Signed URL is -->"+signedURL+"<--");
-					System.out.println(signedURL);
-				else
-					System.out.println("No URL generated. See output for details");
+				urls=gen.generate(spec);
+				for(int i=0; i<urls.size(); /* number of URL protocols generated */ i++) {
+					signedURL=urls.get(i);	
+					if(signedURL !=null)
+						//System.out.println("Signed URL is -->"+signedURL+"<--");
+						System.out.println(signedURL);
+				}
 			}
-
+			else
+				System.out.println("No URL generated. See output for details");
 			// Write output file
 			
 		} catch (IOException e) {
@@ -96,8 +106,7 @@ public class SignedUrlGenerator {
 			case ttlMinNum_:
 				valueStr=inputParams.getProperty(ttlMin_);
 				calendarField=Calendar.MINUTE;
-			break;
-			
+			break;			
 		}
 		if(valueStr != null) {
 			try {
@@ -125,5 +134,11 @@ public class SignedUrlGenerator {
 	
 	private static final String ttlMin_="timeToLiveMinutes";
 	private static final int ttlMinNum_=3;  // for the switch statement
+	
+	private static final String http_="http";
+	private static final int httpNum_=4;  // for the switch statement
+	
+	private static final String https_="https";
+	private static final int httpsNum_=5;  // for the switch statement	
 	
 }

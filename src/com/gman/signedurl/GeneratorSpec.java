@@ -13,6 +13,8 @@ public class GeneratorSpec {
 	private String bucketName=null;
 	private String objectName=null;
 	private Date ttl=null;
+	private boolean http=false;  	// generate http URL
+	private boolean https=true;		// generate https URL
 	
 	public String getBucketName() {
 		return bucketName;
@@ -31,6 +33,18 @@ public class GeneratorSpec {
 	}
 	public void setTtl(Date ttl) {
 		this.ttl = ttl;
+	}
+	public boolean isHttp() {
+		return http;
+	}
+	public void setHttp(boolean http) {
+		this.http = http;
+	}
+	public boolean isHttps() {
+		return https;
+	}
+	public void setHttps(boolean https) {
+		this.https = https;
 	}
 
 }
