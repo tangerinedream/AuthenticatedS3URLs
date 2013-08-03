@@ -41,11 +41,15 @@ public class SignedUrlGenerator {
 			spec.setBucketName(bucketName);  
 			spec.setObjectName(fileName);  
 			spec.setTtl(driver.calcTimeToLive(inputParams));
-			String httpStr=inputParams.getProperty(http_);
-			if(httpStr.compareTo("1")==0)
+			String protocol=null;
+			//Determine desired protocols
+			// HTTP
+			protocol=inputParams.getProperty(http_);
+			if(protocol.compareTo("1")==0)
 				spec.setHttp(true);
-			String httpsStr=inputParams.getProperty(https_);
-			if(httpsStr.compareTo("1")==0)
+			// HTTPS
+			protocol=inputParams.getProperty(https_);
+			if(protocol.compareTo("1")==0)
 				spec.setHttps(true);
 
 			// Generate a Signed URL
@@ -63,7 +67,7 @@ public class SignedUrlGenerator {
 			}
 			else
 				System.out.println("No URL generated. See output for details");
-			// Write output file
+
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -75,13 +79,13 @@ public class SignedUrlGenerator {
 
 	private Date calcTimeToLive(Properties inputParams) {
 		Calendar expiration=new GregorianCalendar();
-		System.out.println("Original Expiration value is "+expiration.getTime().toString());
+		//System.out.println("Current time is "+expiration.getTime().toString());
 
 		
 		for(int i=ttlMMNum_; i<(ttlMinNum_+1); i++){
 			addTimeToLiveValue(i, inputParams, expiration);
 		}
-		System.out.println("New Expiration value is "+expiration.getTime().toString());
+		System.out.println("URL expiration date is "+expiration.getTime().toString());
 		
 		return(expiration.getTime());
 	}
@@ -136,9 +140,7 @@ public class SignedUrlGenerator {
 	private static final int ttlMinNum_=3;  // for the switch statement
 	
 	private static final String http_="http";
-	private static final int httpNum_=4;  // for the switch statement
-	
 	private static final String https_="https";
-	private static final int httpsNum_=5;  // for the switch statement	
+
 	
 }

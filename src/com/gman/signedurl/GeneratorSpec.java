@@ -14,7 +14,7 @@ public class GeneratorSpec {
 	private String objectName=null;
 	private Date ttl=null;
 	private boolean http=false;  	// generate http URL
-	private boolean https=true;		// generate https URL
+	private boolean https=false;		// generate https URL
 	
 	public String getBucketName() {
 		return bucketName;

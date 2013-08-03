@@ -42,11 +42,11 @@ public class SigningGenerator {
 			List<String> listOfURLs=new ArrayList<String>(2);
 			URL url =null;
 			if(s3client_ != null ) {
-				if(spec.isHttp()) {
+				if(spec.isHttps()) {
 					url = s3client_.generatePresignedUrl(generatePresignedUrlRequest);	
 					listOfURLs.add(url.toString());
 				}
-				if(spec.isHttps()) {
+				if(spec.isHttp()) {
 					s3client_.setEndpoint("http://s3.amazonaws.com");
 					url = s3client_.generatePresignedUrl(generatePresignedUrlRequest);
 					listOfURLs.add(url.toString());
