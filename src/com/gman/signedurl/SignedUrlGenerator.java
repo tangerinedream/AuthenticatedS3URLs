@@ -3,9 +3,7 @@
  */
 package com.gman.signedurl;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -52,23 +50,17 @@ public class SignedUrlGenerator {
 			if(protocol.compareTo("1")==0)
 				spec.setHttps(true);
 
-			// Generate a Signed URL
+			// Generate a Signed URL for all protocols requested
 			String signedURL=null;
 			SigningGenerator gen=new SigningGenerator();
 			List<String> urls=null;
-			if( gen != null ) {
-				urls=gen.generate(spec);
-				for(int i=0; i<urls.size(); /* number of URL protocols generated */ i++) {
-					signedURL=urls.get(i);	
-					if(signedURL !=null)
-						//System.out.println("Signed URL is -->"+signedURL+"<--");
-						System.out.println(signedURL);
-				}
+			urls=gen.generate(spec);
+			for(int i=0; i<urls.size(); /* number of URL protocols generated */ i++) {
+				signedURL=urls.get(i);	
+				if(signedURL !=null)
+					//System.out.println("Signed URL is -->"+signedURL+"<--");
+					System.out.println(signedURL);
 			}
-			else
-				System.out.println("No URL generated. See output for details");
-
-			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

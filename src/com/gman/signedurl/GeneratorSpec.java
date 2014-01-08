@@ -7,6 +7,7 @@ import java.util.Date;
 
 /**
  * @author Gary Silverman
+ * POJO of the specification for the Signing Generator to use
  *
  */
 public class GeneratorSpec {

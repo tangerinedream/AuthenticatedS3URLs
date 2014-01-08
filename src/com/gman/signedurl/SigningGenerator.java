@@ -25,9 +25,15 @@ public class SigningGenerator {
 	
 	private AmazonS3 s3client_=null;	
 	
+	/**
+     * Generate one or more Authenticated Query Strings to access an S3 Object (e.g. pre-signed S3 URL).
+     * Multiple strings may be generated based on the protocols selected in the configuration file
+	 *
+	 * @param spec
+	 * @return
+	 */
+	
 	public List<String> generate(GeneratorSpec spec) {
-		
-		
 		try {
 			GeneratePresignedUrlRequest generatePresignedUrlRequest = 
 				    new GeneratePresignedUrlRequest(spec.getBucketName(), spec.getObjectName());
@@ -39,18 +45,21 @@ public class SigningGenerator {
 				s3client_=this.fabricateAmazonS3Client();
 			}
 			
+			// Collect the list of generated pre-signed URLs
 			List<String> listOfURLs=new ArrayList<String>(2);
 			URL url =null;
 			if(s3client_ != null ) {
 				if(spec.isHttps()) {
-					url = s3client_.generatePresignedUrl(generatePresignedUrlRequest);	
+					// Generate an HTTPS protocol URL by accessing the s3 https endpoint
+					s3client_.setEndpoint("https://s3.amazonaws.com");
+					url = s3client_.generatePresignedUrl(generatePresignedUrlRequest);
 					listOfURLs.add(url.toString());
 				}
 				if(spec.isHttp()) {
+					// Generate an HTTP protocol URL by accessing the s3 http endpoint
 					s3client_.setEndpoint("http://s3.amazonaws.com");
 					url = s3client_.generatePresignedUrl(generatePresignedUrlRequest);
 					listOfURLs.add(url.toString());
-					s3client_.setEndpoint("https://s3.amazonaws.com");
 				}
 			}	
 			return(listOfURLs);
@@ -76,6 +85,11 @@ public class SigningGenerator {
 		return(null);
 	}
 	
+	/**
+	 * Create the S3 Client API handle, obtaining the AWS credential from a .properties file
+	 * 
+	 * @return
+	 */
 	private AmazonS3 fabricateAmazonS3Client() {
 		AmazonS3 s3client=null;
 		
