@@ -25,14 +25,12 @@ public class SignedUrlGenerator {
 		// Create one of me
 		SignedUrlGenerator driver= new SignedUrlGenerator();
 		
-		String bucketName=null;
-		String fileName=null;
-		
 		Properties inputParams = new Properties();
 		try {
 			inputParams.load(SignedUrlGenerator.class.getResourceAsStream("/SignedURLInputFile.properties"));
-			bucketName=inputParams.getProperty(bucketName_);
-			fileName=inputParams.getProperty(fileName_);
+			
+			String bucketName=inputParams.getProperty(bucketName_);
+			String fileName=inputParams.getProperty(fileName_);
 
 			// Create a generator spec
 			GeneratorSpec spec=new GeneratorSpec();
@@ -40,25 +38,30 @@ public class SignedUrlGenerator {
 			spec.setObjectName(fileName);  
 			spec.setTtl(driver.calcTimeToLive(inputParams));
 			String protocol=null;
+			
 			//Determine desired protocols
 			// HTTP
 			protocol=inputParams.getProperty(http_);
 			if(protocol.compareTo("1")==0)
 				spec.setHttp(true);
+			
 			// HTTPS
 			protocol=inputParams.getProperty(https_);
 			if(protocol.compareTo("1")==0)
 				spec.setHttps(true);
+			
+			// Validate the URL Target
+			String validateTarget=inputParams.getProperty(vt_);
+			if(validateTarget.compareTo("1")==0)
+				spec.setValidateTarget(true);
 
 			// Generate a Signed URL for all protocols requested
 			String signedURL=null;
 			SigningGenerator gen=new SigningGenerator();
-			List<String> urls=null;
-			urls=gen.generate(spec);
+			List<String> urls=gen.setEndpointsAndGenerate(spec);
 			for(int i=0; i<urls.size(); /* number of URL protocols generated */ i++) {
 				signedURL=urls.get(i);	
 				if(signedURL !=null)
-					//System.out.println("Signed URL is -->"+signedURL+"<--");
 					System.out.println(signedURL);
 			}
 		} catch (IOException e) {
@@ -133,6 +136,7 @@ public class SignedUrlGenerator {
 	
 	private static final String http_="http";
 	private static final String https_="https";
-
+	
+	private static final String vt_="validateTarget";
 	
 }

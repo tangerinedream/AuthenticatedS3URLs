@@ -16,6 +16,7 @@ public class GeneratorSpec {
 	private Date ttl=null;
 	private boolean http=false;  	// generate http URL
 	private boolean https=false;		// generate https URL
+	private boolean validateTarget=false;  //perform GET operation in attempt to determine if target exists
 	
 	public String getBucketName() {
 		return bucketName;
@@ -46,6 +47,18 @@ public class GeneratorSpec {
 	}
 	public void setHttps(boolean https) {
 		this.https = https;
+	}
+	/**
+	 * @return the validateTarget
+	 */
+	public boolean isValidateTarget() {
+		return validateTarget;
+	}
+	/**
+	 * @param validateTarget the validateTarget to set
+	 */
+	public void setValidateTarget(boolean validateTarget) {
+		this.validateTarget = validateTarget;
 	}
 
 }

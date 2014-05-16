@@ -4,6 +4,7 @@
 package com.gman.signedurl;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,13 +34,8 @@ public class SigningGenerator {
 	 * @return
 	 */
 	
-	public List<String> generate(GeneratorSpec spec) {
+	public List<String> setEndpointsAndGenerate(GeneratorSpec spec) {
 		try {
-			GeneratePresignedUrlRequest generatePresignedUrlRequest = 
-				    new GeneratePresignedUrlRequest(spec.getBucketName(), spec.getObjectName());
-			generatePresignedUrlRequest.setMethod(HttpMethod.GET); 
-			generatePresignedUrlRequest.setExpiration(spec.getTtl());
-
 			// create s3client if not yet established
 			if(s3client_==null) {
 				s3client_=this.fabricateAmazonS3Client();
@@ -47,19 +43,17 @@ public class SigningGenerator {
 			
 			// Collect the list of generated pre-signed URLs
 			List<String> listOfURLs=new ArrayList<String>(2);
-			URL url =null;
 			if(s3client_ != null ) {
 				if(spec.isHttps()) {
-					// Generate an HTTPS protocol URL by accessing the s3 https endpoint
+					// Set HTTPS protocol URL by accessing the s3 https endpoint
 					s3client_.setEndpoint("https://s3.amazonaws.com");
-					url = s3client_.generatePresignedUrl(generatePresignedUrlRequest);
-					listOfURLs.add(url.toString());
+					generate(spec, listOfURLs);
 				}
 				if(spec.isHttp()) {
-					// Generate an HTTP protocol URL by accessing the s3 http endpoint
+					// Set HTTP protocol URL by accessing the s3 http endpoint
 					s3client_.setEndpoint("http://s3.amazonaws.com");
-					url = s3client_.generatePresignedUrl(generatePresignedUrlRequest);
-					listOfURLs.add(url.toString());
+					generate(spec, listOfURLs);
+
 				}
 			}	
 			return(listOfURLs);
@@ -83,6 +77,40 @@ public class SigningGenerator {
 			
 		}
 		return(null);
+	}
+	
+	private void generate(GeneratorSpec spec, /*GeneratePresignedUrlRequest generatePresignedUrlRequest,*/ List<String> listOfUrls) {
+		GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(spec.getBucketName(), spec.getObjectName());
+		generatePresignedUrlRequest.setMethod(HttpMethod.GET); 
+		generatePresignedUrlRequest.setExpiration(spec.getTtl());
+		
+		URL url = s3client_.generatePresignedUrl(generatePresignedUrlRequest);
+		if(spec.isValidateTarget() == true) {
+			if(validTarget(url)) 
+				listOfUrls.add(url.toString());
+		}
+	}
+	
+	/**
+	 * Validate the URL by attempting to GET it.  A 200 result code means it has been validated.
+	 * @param URL
+	 * @return
+	 */
+	private boolean validTarget(URL generatedURL) {
+	    int rc=500;
+		try {;
+		    HttpURLConnection connection = (HttpURLConnection)generatedURL.openConnection();
+		    connection.setRequestMethod("GET");
+		    connection.connect();
+		    rc = connection.getResponseCode();
+		    if(rc == HttpURLConnection.HTTP_OK) 
+		    	return true;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("Validation Error [HTTP_CODE=="+rc+"] "+ generatedURL.toString());
+	    return false;
 	}
 	
 	/**
