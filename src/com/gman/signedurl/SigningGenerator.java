@@ -47,12 +47,12 @@ public class SigningGenerator {
 				if(spec.isHttps()) {
 					// Set HTTPS protocol URL by accessing the s3 https endpoint
 					s3client_.setEndpoint("https://s3.amazonaws.com");
-					generate(spec, listOfURLs);
+					listOfURLs=generate(spec, listOfURLs);
 				}
 				if(spec.isHttp()) {
 					// Set HTTP protocol URL by accessing the s3 http endpoint
 					s3client_.setEndpoint("http://s3.amazonaws.com");
-					generate(spec, listOfURLs);
+					listOfURLs=generate(spec, listOfURLs);
 
 				}
 			}	
@@ -79,7 +79,7 @@ public class SigningGenerator {
 		return(null);
 	}
 	
-	private void generate(GeneratorSpec spec, /*GeneratePresignedUrlRequest generatePresignedUrlRequest,*/ List<String> listOfUrls) {
+	private List<String> generate(GeneratorSpec spec, List<String> listOfUrls) {
 		GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(spec.getBucketName(), spec.getObjectName());
 		generatePresignedUrlRequest.setMethod(HttpMethod.GET); 
 		generatePresignedUrlRequest.setExpiration(spec.getTtl());
@@ -89,6 +89,7 @@ public class SigningGenerator {
 			if(validTarget(url)) 
 				listOfUrls.add(url.toString());
 		}
+		return(listOfUrls);
 	}
 	
 	/**
