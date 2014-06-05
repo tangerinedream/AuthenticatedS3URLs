@@ -14,6 +14,11 @@ public class WorkOrderResult {
 	
 	public WorkOrderResult(WorkOrder wo) {
 		workOrder=wo;
+		signedHttpUrl = new SignedUrlResult();
+		signedHttpUrl.setProtocol("http");
+		signedHttpsUrl = new SignedUrlResult();
+		signedHttpsUrl.setProtocol("https");
+		
 	}
 	
 	public static class SignedUrlResult {
@@ -40,23 +45,26 @@ public class WorkOrderResult {
 		}
 		
 		public String toString() {
+			StringBuffer sb=new StringBuffer();
 			if(valid) 
-				return("URL Validated");
+				sb.append("URL Validated");
 			
 			if(url!=null)
-				return(url.toString());
+				sb.append("\n" + url.toString());
 			
-			return(null);
+			return(sb.toString());
 		}
 	}
 	
 	public String toString() {
 		StringBuffer sb=new StringBuffer();
-		if(this.getSignedHttpsUrl()!=null) {
-			sb.append("\n" + this.getSignedHttpsUrl().toString());
+		if(this.getSignedHttpsUrl().getUrl()!=null) {
+			sb.append(this.getSignedHttpsUrl().toString());
+			sb.append("\n");
 		}
-		if(this.getSignedHttpUrl() != null) {
-			sb.append("\n" + this.getSignedHttpUrl().toString());
+		if(this.getSignedHttpUrl().getUrl() != null) {
+			sb.append(this.getSignedHttpUrl().toString());
+			sb.append("\n");
 		}
 		return(sb.toString());
 	}

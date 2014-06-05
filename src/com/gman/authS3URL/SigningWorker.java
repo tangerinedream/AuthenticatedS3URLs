@@ -55,7 +55,7 @@ public class SigningWorker {
 		
 		for( WorkOrder item : woList ) {
 			// process this item or not?
-			if(item.processing.isGenerateAuthURL()) {
+			if(item.getAuthLinkSpec().getProcessing().isGenerateAuthURL()) {
 				
 				// calc expiration
 				ttl=this.makeExpirationDate(item);
@@ -71,7 +71,7 @@ public class SigningWorker {
 	
 	
 	protected WorkOrderResult generate(AmazonS3 s3Conn, WorkOrder wo, Date ttl) {		
-		GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(wo.getTarget().getBucketName(), wo.getTarget().getObjectName());
+		GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(wo.getAuthLinkSpec().getTarget().getBucketName(), wo.getAuthLinkSpec().getTarget().getObjectName());
 		generatePresignedUrlRequest.setMethod(HttpMethod.GET); 
 		generatePresignedUrlRequest.setExpiration(ttl);
 		
@@ -80,13 +80,13 @@ public class SigningWorker {
 		WorkOrderResult woResult=new WorkOrderResult(wo);
 		
 		// If WorkOrder contains an https request, generate that
-		if(wo.protocol.isHttps()) {
+		if(wo.getAuthLinkSpec().getProtocol().isHttps()) {
 			// Set HTTPS protocol URL by accessing the s3 https endpoint
 			s3Conn.setEndpoint(HTTPS_ENDPOINT_);
 			url = s3Conn.generatePresignedUrl(generatePresignedUrlRequest);
 			woResult.getSignedHttpsUrl().setUrl(url.toString());
-			woResult.getSignedHttpsUrl().setProtocol(HTTPS_);
-			if(wo.processing.isValidateAuthURL() == true) {
+			//woResult.getSignedHttpsUrl().setProtocol(HTTPS_);
+			if(wo.getAuthLinkSpec().getProcessing().isValidateAuthURL() == true) {
 				if(validTarget(url)) {
 					woResult.getSignedHttpsUrl().setValid(true);
 				}
@@ -94,13 +94,13 @@ public class SigningWorker {
 		}
 
 		// If WorkOrder contains an http request, generate that
-		if(wo.protocol.isHttp()) {
+		if(wo.getAuthLinkSpec().getProtocol().isHttp()) {
 			// Set HTTP protocol URL by accessing the s3 http endpoint
 			s3Conn.setEndpoint(HTTP_ENDPOINT_);
 			url = s3Conn.generatePresignedUrl(generatePresignedUrlRequest);
 			woResult.getSignedHttpUrl().setUrl(url.toString());
-			woResult.getSignedHttpUrl().setProtocol(HTTP_);
-			if(wo.processing.isValidateAuthURL() == true) {
+			//woResult.getSignedHttpUrl().setProtocol(HTTP_);
+			if(wo.getAuthLinkSpec().getProcessing().isValidateAuthURL() == true) {
 				if(validTarget(url)) {
 					woResult.getSignedHttpUrl().setValid(true);
 				}
@@ -117,7 +117,7 @@ public class SigningWorker {
 	 */
 	private boolean validTarget(URL generatedURL) {
 	    int rc=500;
-		try {;
+		try {
 		    HttpURLConnection connection = (HttpURLConnection)generatedURL.openConnection();
 		    connection.setRequestMethod("GET");
 		    connection.connect();
@@ -133,6 +133,27 @@ public class SigningWorker {
 	}
 	
 	protected List<WorkOrder> makeWorkOrders() {
+		/**
+		 * Alternative Jackson approach
+		 * JsonParser jp=new JsonParser();
+		 * jp.readValueAs(WorkOrder.class);
+		 * ObjectMapper om=new ObjectMapper();
+		 * MappingIterator mi=om.readValues(jp, WorkOrder.class);
+		 * 
+		 * or...
+		 * 
+		 * public static <T> MappingIterator<T> readValues(InputStream src, Class<T> c) throws IOException {       
+  		 * JsonFactory factory = INSTANCE.mapper.getJsonFactory();       
+  		 * JsonParser parser = factory.createJsonParser(src);       
+  		 * return INSTANCE.mapper.readValues(parser, c); 
+  		 * called by:
+  		 * try {                   
+  		 *   rawMos = JacksonManager.readValues(input, RawMo.class);               
+  		 * } catch (IOException e) {                   
+  		 *   logger.error(loggingPrefix + " ERROR cannot read json source", e);               
+  		 * }
+  		 * 
+		 */
 		List<WorkOrder> woList=new Vector<WorkOrder>();
 		
 		// Get Config.json file
@@ -144,31 +165,34 @@ public class SigningWorker {
 		// Parse file
 		ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
 		boolean done=false;
-		while( !done ) {
-			WorkOrder wo=null;
-			
-			// Use Jackson in Databind mode
-			try {
-				wo = mapper.readValue(is, WorkOrder.class);
-			} catch (JsonParseException e) {
-				// TODO Auto-generated catch block
-				System.err.println("JSON parse exception processing "+jsonFile);
-				e.printStackTrace();
-			} catch (JsonMappingException e) {
-				// TODO Auto-generated catch block
-				System.err.println("JSON mapping exception processing "+jsonFile);
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				System.err.println("io exception processing "+jsonFile);
-				e.printStackTrace();
+
+			while( !done /*is.available()>0*/ ) {
+				WorkOrder wo=null;
+				
+				// Use Jackson in Databind mode
+				try {
+					int availTest=is.available();
+					wo = mapper.readValue(is, WorkOrder.class);
+				} catch (JsonParseException e) {
+					// TODO Auto-generated catch block
+					System.err.println("JSON parse exception processing "+jsonFile);
+					e.printStackTrace();
+				} catch (JsonMappingException e) {
+					// TODO Auto-generated catch block
+					System.err.println("JSON mapping exception processing "+jsonFile);
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					System.err.println("io exception processing "+jsonFile);
+					e.printStackTrace();
+				}
+				if( wo != null ) {	
+					woList.add(wo);
+					done=true; // THIS IS A TEMP FORCED STOP until Jackson "ObjectMapper.readValues()" is working
+				} else {
+					done=true;
+				}
 			}
-			if( wo != null ) {	
-				woList.add(wo);
-			} else {
-				done = true;
-			}
-		}
 		// return a List of WorkOrder objects
 		return( woList);
 	}
@@ -198,13 +222,13 @@ public class SigningWorker {
 
 		// Note: we utilize an inner class "expiration" of WorkOrder as that is where the expiration settings are mapped from the json file
 		// Add month increment
-		expiration.add(Calendar.MONTH, wo.expiration.getMonths());
+		expiration.add(Calendar.MONTH, wo.getAuthLinkSpec().getExpiration().getMonths());
 		// Add Day increment
-		expiration.add(Calendar.DATE, wo.expiration.getDays());
+		expiration.add(Calendar.DATE, wo.getAuthLinkSpec().getExpiration().getDays());
 		// Add Hour increment
-		expiration.add(Calendar.HOUR, wo.expiration.getHours());
+		expiration.add(Calendar.HOUR, wo.getAuthLinkSpec().getExpiration().getHours());
 		// Add Minute increment
-		expiration.add(Calendar.MINUTE, wo.expiration.getMinutes());
+		expiration.add(Calendar.MINUTE, wo.getAuthLinkSpec().getExpiration().getMinutes());
 		
 		System.out.println("URL expiration date is "+expiration.getTime().toString());
 		
