@@ -47,7 +47,7 @@ public class WorkOrderResult {
 		public String toString() {
 			StringBuffer sb=new StringBuffer();
 			if(valid) 
-				sb.append("URL Validated");
+				sb.append("URL Target Validated");
 			
 			if(url!=null)
 				sb.append("\n" + url.toString());

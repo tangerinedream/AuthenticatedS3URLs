@@ -166,33 +166,35 @@ public class SigningWorker {
 		ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
 		boolean done=false;
 
-			while( !done /*is.available()>0*/ ) {
-				WorkOrder wo=null;
-				
-				// Use Jackson in Databind mode
-				try {
-					int availTest=is.available();
-					wo = mapper.readValue(is, WorkOrder.class);
-				} catch (JsonParseException e) {
-					// TODO Auto-generated catch block
-					System.err.println("JSON parse exception processing "+jsonFile);
-					e.printStackTrace();
-				} catch (JsonMappingException e) {
-					// TODO Auto-generated catch block
-					System.err.println("JSON mapping exception processing "+jsonFile);
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					System.err.println("io exception processing "+jsonFile);
-					e.printStackTrace();
-				}
-				if( wo != null ) {	
-					woList.add(wo);
-					done=true; // THIS IS A TEMP FORCED STOP until Jackson "ObjectMapper.readValues()" is working
-				} else {
-					done=true;
-				}
+		// Jackson doesn't process multiples in data-bind mode.  So, we'll cover that in a future version
+//		while( !done /*is.available()>0*/ ) {
+			WorkOrder wo=null;
+			
+			// Use Jackson in Databind mode
+			try {
+				int availTest=is.available();
+				wo = mapper.readValue(is, WorkOrder.class);
+			} catch (JsonParseException e) {
+				// TODO Auto-generated catch block
+				System.err.println("JSON parse exception processing "+jsonFile);
+				e.printStackTrace();
+			} catch (JsonMappingException e) {
+				// TODO Auto-generated catch block
+				System.err.println("JSON mapping exception processing "+jsonFile);
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				System.err.println("io exception processing "+jsonFile);
+				e.printStackTrace();
 			}
+			if( wo != null ) {	
+				woList.add(wo);
+//				done=true; // THIS IS A TEMP FORCED STOP until Jackson "ObjectMapper.readValues()" is working
+			} else {
+				done=true;
+			}
+//		}
+		
 		// return a List of WorkOrder objects
 		return( woList);
 	}
@@ -230,7 +232,7 @@ public class SigningWorker {
 		// Add Minute increment
 		expiration.add(Calendar.MINUTE, wo.getAuthLinkSpec().getExpiration().getMinutes());
 		
-		System.out.println("URL expiration date is "+expiration.getTime().toString());
+		System.out.println("Expiration date set to "+expiration.getTime().toString());
 		
 		return(expiration.getTime());
 	}

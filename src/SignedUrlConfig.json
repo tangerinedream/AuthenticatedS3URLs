@@ -1,0 +1,23 @@
+{
+  "authLinkSpec" : {
+      "description" : "A placeholder field for you to describe this specific authenticated link work order specification",
+      "processing" : {
+        "generateAuthURL" : true,
+        "validateAuthURL" : true
+      },
+      "protocol" : {
+        "http" : true,
+        "https" : false
+      },
+      "target" : {
+        "bucketName" : "yourbucketname",
+        "objectName" : "your object name"
+      },         
+      "expiration" : {
+        "months" : "0",
+        "days" : "10",
+        "hours" : "0",
+        "minutes" : "0"
+      }
+  }
+}
