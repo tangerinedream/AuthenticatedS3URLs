@@ -4,8 +4,8 @@
 package com.gman.authS3URL;
 
 /**
- * @author Dipper
- *
+ * @author GMan
+ * 
  */
 public class WorkOrder {
 	protected AuthLinkSpec authLinkSpec=null;
