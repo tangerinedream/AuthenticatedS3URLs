@@ -1,23 +1,47 @@
 {
-  "authLinkSpec" : {
-      "description" : "A placeholder field for you to describe this specific authenticated link work order specification",
-      "processing" : {
-        "generateAuthURL" : true,
-        "validateAuthURL" : true
+  "linkSpecs" : 
+  [
+      {
+        "description" : "A placeholder field for you to describe this specific authenticated link work order specification",
+        "processing" : {
+          "generateAuthURL" : true,
+          "validateAuthURL" : true
+        },
+        "protocol" : {
+          "http" : true,
+          "https" : false
+        },
+        "target" : {
+          "bucketName" : "some_bucket",
+          "objectName" : "some_object"
+        },         
+        "expiration" : {
+          "months" : "0",
+          "days" : "10",
+          "hours" : "0",
+          "minutes" : "0"
+        }
       },
-      "protocol" : {
-        "http" : true,
-        "https" : false
-      },
-      "target" : {
-        "bucketName" : "yourbucketname",
-        "objectName" : "your object name"
-      },         
-      "expiration" : {
-        "months" : "0",
-        "days" : "10",
-        "hours" : "0",
-        "minutes" : "0"
-      }
-  }
+      {
+        "description" : "A second placeholder field for you to describe this specific authenticated link work order specification",
+        "processing" : {
+          "generateAuthURL" : true,
+          "validateAuthURL" : true
+        },
+        "protocol" : {
+          "http" : true,
+          "https" : false
+        },
+        "target" : {
+          "bucketName" : "some_other_bucket",
+          "objectName" : "some_other_object"
+        },         
+        "expiration" : {
+          "months" : "0",
+          "days" : "10",
+          "hours" : "0",
+          "minutes" : "0"
+        }
+     }
+  ]
 }

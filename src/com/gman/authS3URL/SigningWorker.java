@@ -7,9 +7,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
@@ -20,8 +22,13 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gman.authS3URL.WorkOrder.AuthLinkSpec;
 import com.gman.signedurl.SigningGenerator;
 
 /**
@@ -44,7 +51,7 @@ public class SigningWorker {
 	
 	public void doWork() {
 		// get work orders
-		List<WorkOrder> woList=this.makeWorkOrders();
+		List<AuthLinkSpec> linkSpecs=this.makeWorkOrders();
 		
 		// Process work orders
 		Date ttl=null;
@@ -53,9 +60,9 @@ public class SigningWorker {
 		// Establish S3 Connection
 		AmazonS3 s3Conn=this.makeS3Connection();
 		
-		for( WorkOrder item : woList ) {
+		for( AuthLinkSpec item : linkSpecs ) {
 			// process this item or not?
-			if(item.getAuthLinkSpec().getProcessing().isGenerateAuthURL()) {
+			if(item.getProcessing().isGenerateAuthURL()) {
 				
 				// calc expiration
 				ttl=this.makeExpirationDate(item);
@@ -70,23 +77,23 @@ public class SigningWorker {
 	}
 	
 	
-	protected WorkOrderResult generate(AmazonS3 s3Conn, WorkOrder wo, Date ttl) {		
-		GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(wo.getAuthLinkSpec().getTarget().getBucketName(), wo.getAuthLinkSpec().getTarget().getObjectName());
+	protected WorkOrderResult generate(AmazonS3 s3Conn, AuthLinkSpec spec, Date ttl) {		
+		GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(spec.getTarget().getBucketName(), spec.getTarget().getObjectName());
 		generatePresignedUrlRequest.setMethod(HttpMethod.GET); 
 		generatePresignedUrlRequest.setExpiration(ttl);
 		
 		
 		URL url =null;
-		WorkOrderResult woResult=new WorkOrderResult(wo);
+		WorkOrderResult woResult=new WorkOrderResult(spec);
 		
 		// If WorkOrder contains an https request, generate that
-		if(wo.getAuthLinkSpec().getProtocol().isHttps()) {
+		if(spec.getProtocol().isHttps()) {
 			// Set HTTPS protocol URL by accessing the s3 https endpoint
 			s3Conn.setEndpoint(HTTPS_ENDPOINT_);
 			url = s3Conn.generatePresignedUrl(generatePresignedUrlRequest);
 			woResult.getSignedHttpsUrl().setUrl(url.toString());
 			//woResult.getSignedHttpsUrl().setProtocol(HTTPS_);
-			if(wo.getAuthLinkSpec().getProcessing().isValidateAuthURL() == true) {
+			if(spec.getProcessing().isValidateAuthURL() == true) {
 				if(validTarget(url)) {
 					woResult.getSignedHttpsUrl().setValid(true);
 				}
@@ -94,13 +101,13 @@ public class SigningWorker {
 		}
 
 		// If WorkOrder contains an http request, generate that
-		if(wo.getAuthLinkSpec().getProtocol().isHttp()) {
+		if(spec.getProtocol().isHttp()) {
 			// Set HTTP protocol URL by accessing the s3 http endpoint
 			s3Conn.setEndpoint(HTTP_ENDPOINT_);
 			url = s3Conn.generatePresignedUrl(generatePresignedUrlRequest);
 			woResult.getSignedHttpUrl().setUrl(url.toString());
 			//woResult.getSignedHttpUrl().setProtocol(HTTP_);
-			if(wo.getAuthLinkSpec().getProcessing().isValidateAuthURL() == true) {
+			if(spec.getProcessing().isValidateAuthURL() == true) {
 				if(validTarget(url)) {
 					woResult.getSignedHttpUrl().setValid(true);
 				}
@@ -132,29 +139,10 @@ public class SigningWorker {
 	    return false;
 	}
 	
-	protected List<WorkOrder> makeWorkOrders() {
-		/**
-		 * Alternative Jackson approach
-		 * JsonParser jp=new JsonParser();
-		 * jp.readValueAs(WorkOrder.class);
-		 * ObjectMapper om=new ObjectMapper();
-		 * MappingIterator mi=om.readValues(jp, WorkOrder.class);
-		 * 
-		 * or...
-		 * 
-		 * public static <T> MappingIterator<T> readValues(InputStream src, Class<T> c) throws IOException {       
-  		 * JsonFactory factory = INSTANCE.mapper.getJsonFactory();       
-  		 * JsonParser parser = factory.createJsonParser(src);       
-  		 * return INSTANCE.mapper.readValues(parser, c); 
-  		 * called by:
-  		 * try {                   
-  		 *   rawMos = JacksonManager.readValues(input, RawMo.class);               
-  		 * } catch (IOException e) {                   
-  		 *   logger.error(loggingPrefix + " ERROR cannot read json source", e);               
-  		 * }
-  		 * 
-		 */
-		List<WorkOrder> woList=new Vector<WorkOrder>();
+	protected List<AuthLinkSpec> makeWorkOrders() {
+
+		// The list of linkSpec items
+		List<AuthLinkSpec> resList=new Vector<AuthLinkSpec>();
 		
 		// Get Config.json file
 		String jsonFile=new String("SignedUrlConfig.json");
@@ -162,41 +150,29 @@ public class SigningWorker {
 		// The slash is prepended to locate the json file in the root package
 		InputStream is = this.getClass().getResourceAsStream("/"+jsonFile);
 		
-		// Parse file
-		ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
-		boolean done=false;
-
-		// Jackson doesn't process multiples in data-bind mode.  So, we'll cover that in a future version
-//		while( !done /*is.available()>0*/ ) {
-			WorkOrder wo=null;
-			
-			// Use Jackson in Databind mode
-			try {
-				int availTest=is.available();
-				wo = mapper.readValue(is, WorkOrder.class);
-			} catch (JsonParseException e) {
-				// TODO Auto-generated catch block
-				System.err.println("JSON parse exception processing "+jsonFile);
-				e.printStackTrace();
-			} catch (JsonMappingException e) {
-				// TODO Auto-generated catch block
-				System.err.println("JSON mapping exception processing "+jsonFile);
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				System.err.println("io exception processing "+jsonFile);
-				e.printStackTrace();
-			}
-			if( wo != null ) {	
-				woList.add(wo);
-//				done=true; // THIS IS A TEMP FORCED STOP until Jackson "ObjectMapper.readValues()" is working
-			} else {
-				done=true;
-			}
-//		}
+		// Create the Jackson Object Mapper
+		ObjectMapper om = new ObjectMapper();
 		
-		// return a List of WorkOrder objects
-		return( woList);
+		try {
+			//Parse the JSON file, constructing the WorkOrder containing zero or more instances of "linkSpec" items
+			WorkOrder wo = om.readValue(is, WorkOrder.class);
+			ArrayList <AuthLinkSpec>linkSpecs=wo.getLinkSpecs();
+			for(int i=0;i<linkSpecs.size();i++) {
+				resList.add(linkSpecs.get(i));
+			}
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		
+		// return a List of AuthLinkSpec objects
+		return( resList );
 	}
 	
 	/**
@@ -218,19 +194,19 @@ public class SigningWorker {
 		return s3client;
 	}
 	
-	private Date makeExpirationDate(WorkOrder wo) {
+	private Date makeExpirationDate(AuthLinkSpec spec) {
 		Calendar expiration=new GregorianCalendar();
 		//System.out.println("Current time is "+expiration.getTime().toString());
 
 		// Note: we utilize an inner class "expiration" of WorkOrder as that is where the expiration settings are mapped from the json file
 		// Add month increment
-		expiration.add(Calendar.MONTH, wo.getAuthLinkSpec().getExpiration().getMonths());
+		expiration.add(Calendar.MONTH, spec.getExpiration().getMonths());
 		// Add Day increment
-		expiration.add(Calendar.DATE, wo.getAuthLinkSpec().getExpiration().getDays());
+		expiration.add(Calendar.DATE, spec.getExpiration().getDays());
 		// Add Hour increment
-		expiration.add(Calendar.HOUR, wo.getAuthLinkSpec().getExpiration().getHours());
+		expiration.add(Calendar.HOUR, spec.getExpiration().getHours());
 		// Add Minute increment
-		expiration.add(Calendar.MINUTE, wo.getAuthLinkSpec().getExpiration().getMinutes());
+		expiration.add(Calendar.MINUTE, spec.getExpiration().getMinutes());
 		
 		System.out.println("Expiration date set to "+expiration.getTime().toString());
 		

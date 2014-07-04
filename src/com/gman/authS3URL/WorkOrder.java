@@ -3,12 +3,14 @@
  */
 package com.gman.authS3URL;
 
+import java.util.ArrayList;
+
 /**
  * @author GMan
  * 
  */
 public class WorkOrder {
-	protected AuthLinkSpec authLinkSpec=null;
+	protected ArrayList<AuthLinkSpec> linkSpecs=null;
 	
 	public static class AuthLinkSpec { 
 		protected String description = null;
@@ -144,12 +146,11 @@ public class WorkOrder {
 	
 	}
 
-	public AuthLinkSpec getAuthLinkSpec() {
-		return authLinkSpec;
+	public ArrayList<AuthLinkSpec> getLinkSpecs() {
+		return linkSpecs;
 	}
 
-	public void setAuthLinkSpec(AuthLinkSpec authLinkSpec) {
-		this.authLinkSpec = authLinkSpec;
+	public void setLinkSpecs(ArrayList<AuthLinkSpec> linkSpecs) {
+		this.linkSpecs = linkSpecs;
 	}
-
 }

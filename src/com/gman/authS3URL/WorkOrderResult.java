@@ -3,17 +3,19 @@
  */
 package com.gman.authS3URL;
 
+import com.gman.authS3URL.WorkOrder.AuthLinkSpec;
+
 /**
  * @author Dipper
  *
  */
 public class WorkOrderResult {
-	protected WorkOrder workOrder=null;
+	protected AuthLinkSpec spec=null;
 	protected SignedUrlResult signedHttpUrl=null;
 	protected SignedUrlResult signedHttpsUrl=null;
 	
-	public WorkOrderResult(WorkOrder wo) {
-		workOrder=wo;
+	public WorkOrderResult(AuthLinkSpec spec) {
+		this.spec=spec;
 		signedHttpUrl = new SignedUrlResult();
 		signedHttpUrl.setProtocol("http");
 		signedHttpsUrl = new SignedUrlResult();
@@ -69,13 +71,7 @@ public class WorkOrderResult {
 		return(sb.toString());
 	}
 
-	public WorkOrder getWorkOrder() {
-		return workOrder;
-	}
 
-	public void setWorkOrder(WorkOrder workOrder) {
-		this.workOrder = workOrder;
-	}
 
 	public SignedUrlResult getSignedHttpUrl() {
 		return signedHttpUrl;
@@ -91,6 +87,18 @@ public class WorkOrderResult {
 
 	public void setSignedHttpsUrl(SignedUrlResult signedHttpsUrl) {
 		this.signedHttpsUrl = signedHttpsUrl;
+	}
+
+
+
+	public AuthLinkSpec getSpec() {
+		return spec;
+	}
+
+
+
+	public void setSpec(AuthLinkSpec spec) {
+		this.spec = spec;
 	}
 
 }
