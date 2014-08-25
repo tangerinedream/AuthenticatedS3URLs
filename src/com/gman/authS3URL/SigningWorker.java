@@ -11,9 +11,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.Vector;
 
 import com.amazonaws.HttpMethod;
@@ -22,14 +20,9 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gman.authS3URL.WorkOrder.AuthLinkSpec;
-import com.gman.signedurl.SigningGenerator;
 
 /**
  * @author GMan
@@ -186,7 +179,7 @@ public class SigningWorker {
 		// Setup Amazon S3 client
 		try {
 			s3client = new AmazonS3Client(new PropertiesCredentials(
-					SigningGenerator.class.getResourceAsStream("/AwsCredentials.properties")));  // Starts with slash because SigningGenerator is not in the "default" package.
+					SigningWorker.class.getResourceAsStream("/AwsCredentials.properties")));  // Starts with slash because SigningGenerator is not in the "default" package.
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

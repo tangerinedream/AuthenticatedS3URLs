@@ -12,36 +12,78 @@
           "https" : false
         },
         "target" : {
-          "bucketName" : "some_bucket",
-          "objectName" : "some_object"
+          "bucketName" : "transfer.gman.com",
+          "objectName" : "GarySilverman_Resume.pdf"
         },         
         "expiration" : {
           "months" : "0",
-          "days" : "10",
+          "days" : "28",
           "hours" : "0",
           "minutes" : "0"
         }
       },
-      {
-        "description" : "A second placeholder field for you to describe this specific authenticated link work order specification",
+    {
+      "description" : "Quotes",
+      "processing" : {
+        "generateAuthURL" : false,
+        "validateAuthURL" : true
+      },
+      "protocol" : {
+        "http" : true,
+        "https" : false
+      },
+      "target" : {
+        "bucketName" : "demo.gman.com",
+        "objectName" : "Quotes.pdf"
+      },         
+      "expiration" : {
+        "months" : "0",
+        "days" : "5",
+        "hours" : "0",
+        "minutes" : "0"
+        }
+      },
+      {  
+        "description" : "Architect Perspective",
         "processing" : {
-          "generateAuthURL" : true,
-          "validateAuthURL" : true
+          "generateAuthURL" : false,
+          "validateAuthURL" : false
         },
         "protocol" : {
           "http" : true,
           "https" : false
         },
         "target" : {
-          "bucketName" : "some_other_bucket",
-          "objectName" : "some_other_object"
+          "bucketName" : "demo.gman.com",
+          "objectName" : "BredemeyerArchitectRole.pdf"
         },         
         "expiration" : {
           "months" : "0",
-          "days" : "10",
+          "days" : "2",
           "hours" : "0",
           "minutes" : "0"
         }
-     }
+      },
+      {
+        "description" : "Internet Scale Design",
+        "processing" : {
+          "generateAuthURL" : false,
+          "validateAuthURL" : false
+        },
+        "protocol" : {
+          "http" : true,
+          "https" : false
+        },
+        "target" : {
+          "bucketName" : "demo.gman.com",
+          "objectName" : "DesigningForInternetScale.pdf"
+        },         
+        "expiration" : {
+          "months" : "0",
+          "days" : "2",
+          "hours" : "0",
+          "minutes" : "0"
+        }
+      }
   ]
 }
