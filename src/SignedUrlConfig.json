@@ -12,8 +12,8 @@
           "https" : false
         },
         "target" : {
-          "bucketName" : "transfer.gman.com",
-          "objectName" : "GarySilverman_Resume.pdf"
+          "bucketName" : "bucket.domain.com",
+          "objectName" : "file.pdf"
         },         
         "expiration" : {
           "months" : "0",
@@ -25,7 +25,7 @@
     {
       "description" : "Quotes",
       "processing" : {
-        "generateAuthURL" : false,
+        "generateAuthURL" : true,
         "validateAuthURL" : true
       },
       "protocol" : {
@@ -33,7 +33,7 @@
         "https" : false
       },
       "target" : {
-        "bucketName" : "demo.gman.com",
+        "bucketName" : "anotherbucket.domain.com",
         "objectName" : "Quotes.pdf"
       },         
       "expiration" : {
@@ -41,49 +41,7 @@
         "days" : "5",
         "hours" : "0",
         "minutes" : "0"
-        }
-      },
-      {  
-        "description" : "Architect Perspective",
-        "processing" : {
-          "generateAuthURL" : false,
-          "validateAuthURL" : false
-        },
-        "protocol" : {
-          "http" : true,
-          "https" : false
-        },
-        "target" : {
-          "bucketName" : "demo.gman.com",
-          "objectName" : "BredemeyerArchitectRole.pdf"
-        },         
-        "expiration" : {
-          "months" : "0",
-          "days" : "2",
-          "hours" : "0",
-          "minutes" : "0"
-        }
-      },
-      {
-        "description" : "Internet Scale Design",
-        "processing" : {
-          "generateAuthURL" : false,
-          "validateAuthURL" : false
-        },
-        "protocol" : {
-          "http" : true,
-          "https" : false
-        },
-        "target" : {
-          "bucketName" : "demo.gman.com",
-          "objectName" : "DesigningForInternetScale.pdf"
-        },         
-        "expiration" : {
-          "months" : "0",
-          "days" : "2",
-          "hours" : "0",
-          "minutes" : "0"
-        }
       }
+    }
   ]
 }
