@@ -116,7 +116,7 @@ public class SigningWorker {
 	 * @return
 	 */
 	private boolean validTarget(URL generatedURL) {
-	    int rc=500;
+		int rc=HttpURLConnection.HTTP_NOT_FOUND;  // Need to default to something!
 		try {
 		    HttpURLConnection connection = (HttpURLConnection)generatedURL.openConnection();
 		    connection.setRequestMethod("GET");
