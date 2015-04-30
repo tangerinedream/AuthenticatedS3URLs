@@ -9,10 +9,11 @@ This solution leverages the AWS Java API to generate pre-authenticated URLs.  Th
 
 Gradle is used to build and run the application
 
-# Build only
+Build only
 $ gradle build
 
 or
 
-# Build and run
+Build and run
+To run, you will want to update the SignedUrlConfig.json file and configure it to your needs.
 $ gradle run
