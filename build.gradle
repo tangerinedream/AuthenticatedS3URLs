@@ -1,0 +1,30 @@
+apply plugin: 'java'
+apply plugin:'application'
+
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.5.3'
+	//compile 'com.fasterxml.jackson.core:jackson-core:2.5.3'
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.5.3'
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.5.3'
+	// These are AWS SDK Dependencies and not sure if we need any of them beyond AWS jar
+	compile 'com.amazonaws:aws-java-sdk:1.5.2'
+	//compile 'commons-logging:commons-logging:1.1.1'
+	//compile 'org.apache.httpcomponents:httpclient:4.2'
+	//compile 'commons-codec:commons-codec:1.3'
+	// These are duplicative to above, which are v 2.3+
+	//compile 'org.codehaus.jackson:jackson-core-asl:1.8.9'
+	//compile 'org.codehaus.jackson:jackson-mapper-asl:1.8.9'
+	// The input file
+	compile files("src/main/resources/SignedUrlConfig.json")
+	// AWS Credentials - we never want this file published to the DIST
+	compile files("private/AwsCredentials.properties")
+
+}
+
+mainClassName = "com.gman.authS3URL.SigningWorker"
