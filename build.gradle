@@ -16,7 +16,8 @@ dependencies {
 	// The json input file
 	compile files("src/main/resources/SignedUrlConfig.json")
 	// AWS Credentials - we never want this file published to the DIST
-	compile files("private/AwsCredentials.properties")
+	compile files("src/main/resources/AwsCredentials.properties")
+	//compile files("private/AwsCredentials.properties")
 
 }
 
