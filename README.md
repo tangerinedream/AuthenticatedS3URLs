@@ -14,6 +14,10 @@ Gradle is used to build and run the application
 $ gradle build
 
 # Build and run
-To run, you will want to update the src/main/resources/SignedUrlConfig.json file and configure it to your needs.
+To run, you will want to:
+
+1) update the src/main/resources/SignedUrlConfig.json file and configure it to your needs, and
+
+2) Create a file called src/main/resources/AwsCredentials.properties in your private repo (please add to your .gitignore), or set the equivent environment variables.
 
 $ gradle run
