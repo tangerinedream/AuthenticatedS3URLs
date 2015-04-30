@@ -1,0 +1,47 @@
+{
+  "linkSpecs" : 
+  [
+      {
+        "description" : "A placeholder field for you to describe this specific authenticated link work order specification",
+        "processing" : {
+          "generateAuthURL" : false,
+          "validateAuthURL" : false
+        },
+        "protocol" : {
+          "http" : true,
+          "https" : false
+        },
+        "target" : {
+          "bucketName" : "bucket.domain.com",
+          "objectName" : "file.pdf"
+        },         
+        "expiration" : {
+          "months" : "0",
+          "days" : "28",
+          "hours" : "0",
+          "minutes" : "0"
+        }
+      },
+    {
+      "description" : "Quotes",
+      "processing" : {
+        "generateAuthURL" : true,
+        "validateAuthURL" : true
+      },
+      "protocol" : {
+        "http" : true,
+        "https" : false
+      },
+      "target" : {
+        "bucketName" : "anotherbucket.domain.com",
+        "objectName" : "Quotes.pdf"
+      },         
+      "expiration" : {
+        "months" : "0",
+        "days" : "5",
+        "hours" : "0",
+        "minutes" : "0"
+      }
+    }
+  ]
+}
