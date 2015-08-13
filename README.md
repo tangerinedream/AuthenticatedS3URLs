@@ -7,6 +7,14 @@ Simply generate one or more URL's, provide to anyone you like including non AWS 
 
 This solution leverages the AWS Java API to generate pre-authenticated URLs.  These URLs self contain an STS provided AccessID and public key encoded in the URL itself.  There are configuration options to customize the behavior of the pre-authenticated URL string, including S3 bucket, object, http/s protocol, and time to live after which the URL is no longer valid.
 
+Please note that in the json config file, if you have a subfolder within the S3 bucket, do not put a leading slash on the "object" attribute.  The correct format for com.tangerinedream.bucket/folder/file.zip is
+
+"target" : {
+ "bucketName" : "com.tangerinedream.bucket",
+ "objectName" : "folder/file.zip"
+ }
+
+
 Gradle is used to build and run the application
 
 # Build 
